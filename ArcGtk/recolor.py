@@ -3,9 +3,9 @@ import re
 import fnmatch
 
 def recolor(rgb):
-    red = rgb[0]
-    green = rgb[1]
-    blue = rgb[2]
+    red = float(rgb[0])
+    green = float(rgb[1])
+    blue = float(rgb[2])
 
     # determine if recolor necessary
     if red == 0 or green == 0 or blue == 0:
@@ -31,7 +31,7 @@ def sub_hex(hexMatch):
     rgb = tuple(int(match[i:i+2], 16) for i in (0, 2 ,4))
     newColor = recolor(rgb)
     if newColor == rgb:
-        return f'#{match}'
+        return '#%s' % match
     return '#%02x%02x%02x' % newColor
 
 def sub_rgb(rgbMatch):
@@ -42,7 +42,7 @@ def sub_rgb(rgbMatch):
     if newColor == rgb:
         result = match
     else:
-        result = f"{newColor[0]}, {newColor[1]}, {newColor[2]}"
+        result = "%d, %d, %d" % (newColor[0], newColor[1], newColor[2]) 
     return rgbMatch.group(1) + result + (rgbMatch.group(3) or "") + rgbMatch.group(4)
 
 def recolor_files(match):
@@ -51,6 +51,7 @@ def recolor_files(match):
             filepath = os.path.join(path, filename)
             with open(filepath) as f:
                 data = f.read()
+            print("Recoloring: %s" % filepath)
             data = re.sub(r'#[0-9A-Fa-f]{6}', sub_hex, data)
             data = re.sub(r'(rgba?\()([0-9]{1,3}, *[0-9]{1,3}, *[0-9]{1,3})(, *[0-9.]+)?(\))', sub_rgb, data)
             data = re.sub(r'(\[ ?)([0-9]{1,3}, *[0-9]{1,3}, *[0-9]{1,3})(, *[0-9.]+)?( ?\])', sub_rgb, data)
